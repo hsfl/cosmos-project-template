@@ -70,16 +70,16 @@ int main(int argc, char** argv)
     // set the soh string
     agent->set_sohstring(soh.c_str());
 
-
+    cartpos pos_eci;
     //    agent->set_sohstring(soh);
 
     // Start executing the agent
     while(agent->running())
     {
         // Start executing the agent
-        //        pos_eci.utc = currentmjd(0);
-        //        agent->cinfo->node.loc.pos.eci = pos_eci;
-        agent->cinfo->devspec.imu[0]->temp = 123;
+        pos_eci.utc = currentmjd(0);
+        agent->cinfo->node.loc.pos.eci = pos_eci;
+//        agent->cinfo->device[0].imu.temp = 123;
 
         //sleep for 1 sec
         COSMOS_SLEEP(0.1);
