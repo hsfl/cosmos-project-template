@@ -5,7 +5,7 @@ project(cosmos-project-template)
 #add_executable(${PROJECT_NAME} ${SRC_LIST})
 
 # point to cosmos/source folder
-set(COSMOS_SOURCE   "../../../")
+set(COSMOS_SOURCE   "../../")
 set(USE_COSMOS_FROM "SOURCE")
 
 #include_directories("/Users/miguelnunes/")
