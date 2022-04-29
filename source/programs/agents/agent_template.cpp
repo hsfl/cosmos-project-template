@@ -33,15 +33,18 @@
 
 #include "agent/agentclass.h"
 #include "support/configCosmos.h"
-#include "agent/agentclass.h"
-#include "device/serial/serialclass.h"
+#include "support/stringlib.h"
+
 #include <iostream>
-#include <fstream>
+#include <iomanip>
+#include <vector>
 
 using namespace std;
 Agent *agent;
 ofstream file;
 
+// Agent requests
+int32_t example_agent_request(string& request, string& response, Agent* agent);
 
 int main(int argc, char** argv)
 {
@@ -51,6 +54,9 @@ int main(int argc, char** argv)
     string agentname = "template"; //name of the agent that the request is directed to
 
     agent = new Agent(nodename, agentname);
+
+    // Add agent requests
+    agent->add_request("example_req", example_agent_request, "example_req [args...]", "Prints out any number of args you pass to this");
 
     // add state of health (soh)
     string soh = "{\"device_batt_current_000\"}";
@@ -85,6 +91,32 @@ int main(int argc, char** argv)
         COSMOS_SLEEP(0.1);
     }
 
+
+    return 0;
+}
+
+//! This is a sample agent request, all agent requests have these params
+//! \param request The string passed to the agent when this agent request was called
+//! \param response The string shown to the user when the agent request returns
+//! \param agent The agent to operate on
+//! \return 0
+int32_t example_agent_request(string& request, string& response, Agent* agent)
+{
+    // The first element is always the name of the agent request,
+    // any additional arguments to the agent request will be elements 1 and beyond
+    vector<string> args = string_split(request);
+    cout << "I am " << agent->nodeName << ":" << agent->agentName << endl;
+    cout << "Agent request called: " << args[0] << endl;
+    cout << "Number of arguments: " << args.size() << endl;
+    cout << "Arguments:" << endl;
+    for (size_t i = 0; i < args.size(); ++i)
+    {
+        cout << std::setw(4) << to_string(i) << ": "<< args[i] << endl;
+    }
+    cout << endl;
+
+    // Response from agent request
+    response = "This is the response message";
 
     return 0;
 }
