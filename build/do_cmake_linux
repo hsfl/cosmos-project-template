@@ -1,0 +1,9 @@
+#!/bin/bash
+if [ -d linux ]; then
+echo "Configuring linux"
+else
+mkdir linux
+echo "Making and configuring linux"
+fi
+cd linux
+cmake $2 -DCMAKE_BUILD_TYPE=Debug -DBUILD_TYPE=linux -DCROSS_TYPE=linux ../../source

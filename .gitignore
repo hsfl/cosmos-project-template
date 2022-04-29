@@ -1,2 +1,5 @@
+# ignore build directory, but keep build scripts
+build/*
+!build/do_cmake*
 
 source/CMakeLists\.txt\.user

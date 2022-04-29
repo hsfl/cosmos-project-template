@@ -70,7 +70,7 @@ int main(int argc, char** argv)
     // set the soh string
     agent->set_sohstring(soh.c_str());
 
-    cartpos pos_eci;
+    Convert::cartpos pos_eci;
     //    agent->set_sohstring(soh);
 
     // Start executing the agent
