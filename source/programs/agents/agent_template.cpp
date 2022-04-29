@@ -98,7 +98,7 @@ int main(int argc, char** argv)
 //! This is a sample agent request, all agent requests have these params
 //! \param request The string passed to the agent when this agent request was called
 //! \param response The string shown to the user when the agent request returns
-//! \param agent The agent to operate on
+//! \param agent A pointer to this agent
 //! \return 0
 int32_t example_agent_request(string& request, string& response, Agent* agent)
 {
