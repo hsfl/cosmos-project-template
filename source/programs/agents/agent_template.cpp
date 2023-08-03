@@ -50,10 +50,10 @@ int main(int argc, char** argv)
 {
     cout << "Agent Template" << endl;
     Agent *agent;
-    string nodename = "cubesat1";
-    string agentname = "template"; //name of the agent that the request is directed to
+    string nodename = "testnode";
+    string agentname = "testagent"; //name of the agent that the request is directed to
 
-    agent = new Agent(nodename, agentname);
+    agent = new Agent("", nodename, agentname);
 
     // Add agent requests
     agent->add_request("example_req", example_agent_request, "example_req [args...]", "Prints out any number of args you pass to this");
@@ -105,7 +105,7 @@ int32_t example_agent_request(string& request, string& response, Agent* agent)
     // The first element is always the name of the agent request,
     // any additional arguments to the agent request will be elements 1 and beyond
     vector<string> args = string_split(request);
-    cout << "I am " << agent->nodeName << ":" << agent->agentName << endl;
+    cout << "I am " << agent->cinfo->node.name << ":" << agent->cinfo->agent0.name << endl;
     cout << "Agent request called: " << args[0] << endl;
     cout << "Number of arguments: " << args.size() << endl;
     cout << "Arguments:" << endl;
