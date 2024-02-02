@@ -3,6 +3,7 @@
 using namespace ProjectName::Ground::Agent;
 using namespace ProjectName::Ground::SubAgent;
 using namespace ProjectName::Common;
+using namespace ProjectName::Utils;
 
 int main(int argc, char *argv[])
 {
@@ -111,6 +112,7 @@ void ProjectName::Ground::Agent::check_events()
 
     timer.reset();
 }
+
 void ProjectName::Ground::Agent::ping_inactive_nodes()
 {
     static ElapsedTime timer;
@@ -211,7 +213,7 @@ void ProjectName::Ground::Agent::init_agent(char *argv[], string node_name, uint
 // Miscellaneous
 ////////////////////////////////////
 // Overriding PacketHandler's default handling of DecodeBeacon, for sending data to Telegraf
-int32_t DecodeBeacon(PacketComm& packet, string &response, Agent* agent)
+int32_t ProjectName::Ground::Agent::DecodeBeacon(PacketComm& packet, string &response, Support::Agent* agent)
 {
     Beacon beacon;
     beacon.Init();

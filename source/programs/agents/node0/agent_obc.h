@@ -10,7 +10,7 @@
 #include "support/packetcomm.h"
 #include "support/packethandler.h"
 
-#include "common/common.h"
+#include "utils/common.h"
 #include "subagent/node0/obc_subagents.h"
 
 namespace ProjectName

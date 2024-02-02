@@ -8,8 +8,8 @@
 #include "support/packetcomm.h"
 #include "support/packethandler.h"
 
-#include "common/common.h"
-#include "common/utils.h"
+#include "utils/common.h"
+#include "utils/utils.h"
 #include "subagent/ground/ground_subagents.h"
 
 namespace ProjectName
@@ -31,8 +31,10 @@ namespace ProjectName
             socket_channel cosmos_web_telegraf_channel_dev;
             //! Port in Telegraf that routes to InfluxDB
             const int TELEGRAF_PORT_DEV = 10095;
-            //! Address of Telegraf container
-            const string COSMOS_WEB_ADDR = "127.0.0.1";
+            //! Hostname of Telegraf container
+            const string COSMOS_WEB_ADDR = "cosmos_telegraf";
+            //! Address of Telegraf instance. Use if running locally, or change to IP address of where Telegraf is running.
+            // const string COSMOS_WEB_ADDR = "127.0.0.1";
 
             //! Class that helps handle incoming packets
             PacketHandler packethandler;

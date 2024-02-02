@@ -1,4 +1,5 @@
 # ignore build directory, but keep build scripts
+.vscode
 build/*
 !build/do_cmake*
 
