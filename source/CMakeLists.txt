@@ -23,10 +23,8 @@ IF(${CMAKE_HOST_SYSTEM_NAME} MATCHES "Linux")
         # Set installation directory
         IF("$ENV{COSMOS}" STREQUAL "")
             SET(COSMOS "~/cosmos/arm")
-#            SET(COSMOS_SOURCE "~/cosmos/src")
         ELSE()
             SET(COSMOS "$ENV{COSMOS}/arm")
-#            SET(COSMOS_SOURCE "$ENV{COSMOS}/src")
         ENDIF("$ENV{COSMOS}" STREQUAL "")
 
         # Set Toolchain File
@@ -103,12 +101,6 @@ IF(${CMAKE_HOST_SYSTEM_NAME} MATCHES "Windows")
         ENDIF("$ENV{COSMOS}" STREQUAL "")
     ENDIF()
 
-
-    # TODO: implement the option to compile the code using cosmos-source directly
-
-    # SET(COSMOS_SOURCE_CORE "e:/cosmos-source/core/")
-    # add_subdirectory(${COSMOS_SOURCE}/core cosmos/core)
-
     SET(COSMOS_SOURCE_CORE "${COSMOS_SOURCE}/core/")
 
     # Convert "/" to "\" IF we are in Windows
@@ -144,9 +136,5 @@ link_directories(${COSMOS_LIB_DIRS})
 
 include_directories(${PROJECT_SOURCE_DIR}/libraries)
 add_subdirectory(${PROJECT_SOURCE_DIR}/libraries)
-
-# Note that the modules folder must be cloned/added in manually
-#include_directories(${COSMOS_SOURCE}/modules/devices/radio/isis/libraries/txs)
-#add_subdirectory(${COSMOS_SOURCE}/modules/devices/radio/isis/libraries/txs     ${CMAKE_BINARY_DIR}/libraries/isis/txs)
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/programs)

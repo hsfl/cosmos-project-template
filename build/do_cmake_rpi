@@ -1,4 +1,11 @@
 #!/bin/bash
-mkdir rpi_$1
-cd rpi_$1
+
+# Append build type to rpi_ if there is an argument
+if [ "$#" -eq 0 ]; then
+    mkdir rpi
+    cd rpi
+else
+    mkdir "rpi_$1"
+    cd rpi_$1
+fi
 cmake  -DCMAKE_BUILD_TYPE=$1 -DCMAKE_TOOLCHAIN_FILE=../cmake/toolchain_rpi_linux.cmake -DCROSS_TYPE=rpi ../../source
