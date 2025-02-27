@@ -1,0 +1,86 @@
+version: '3'
+services:
+    agent_file_flight:
+        image: hsfl2/agent_file:0.1.2
+        container_name: agent_file_flight
+        hostname: demo_flightnode
+        tty: true
+        logging:
+          driver: "json-file"
+          options:
+            max-size: "5m"
+            max-file: "3"
+        networks:
+            - network
+        volumes:
+          - ${HOME}/cosmos/nodes:/home/cosmosuser/cosmos/nodes
+
+    agent_file_ground:
+        image: hsfl2/agent_file:0.1.2
+        container_name: agent_file_ground
+        hostname: demo_groundnode
+        tty: true
+        logging:
+          driver: "json-file"
+          options:
+            max-size: "5m"
+            max-file: "3"
+        networks:
+            - network
+        volumes:
+          - ${HOME}/cosmos/nodes:/home/cosmosuser/cosmos/nodes
+
+    agent_ground:
+        image: hsfl2/demo_agent_ground:0.1.0
+        command: -d -r agent_obc -w cosmos_telegraf
+        container_name: agent_ground
+        hostname: demo_groundnode
+        tty: true
+        logging:
+          driver: "json-file"
+          options:
+            max-size: "5m"
+            max-file: "3"
+        networks:
+            - network
+            - cosmos_cwnetwork
+        volumes:
+          - ${HOME}/cosmos/nodes:/home/cosmosuser/cosmos/nodes
+
+    agent_obc:
+        image: hsfl2/demo_agent_obc:0.1.0
+        command: -d -r agent_ground
+        container_name: agent_obc
+        hostname: demo_flightnode
+        tty: true
+        logging:
+          driver: "json-file"
+          options:
+            max-size: "5m"
+            max-file: "3"
+        networks:
+            - network
+        volumes:
+          - ${HOME}/cosmos/nodes:/home/cosmosuser/cosmos/nodes
+
+    propagator_flight:
+        image: hsfl2/propagatorv3:0.1.0
+        command: '{\"realmname\":\"demo\"}'
+        container_name: propagator_flight
+        hostname: demo_flightnode
+        tty: true
+        logging:
+          driver: "json-file"
+          options:
+            max-size: "5m"
+            max-file: "3"
+        networks:
+            - network
+        volumes:
+          - ${HOME}/cosmos/nodes:/home/cosmosuser/cosmos/nodes
+
+networks:
+    network:
+      driver: bridge
+    cosmos_cwnetwork:
+      external: true # Started with default cosmos installation docker-compose.yml file

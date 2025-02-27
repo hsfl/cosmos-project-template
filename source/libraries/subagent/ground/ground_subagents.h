@@ -12,7 +12,14 @@ namespace ProjectName
     {
         namespace SubAgent
         {
-            int32_t init_subagents(Agent *agent);
+            /**
+             * @brief Initializes the ground subagents
+             * 
+             * @param agent Pointer to the parent agent
+             * @param remote_address Address or hostname of the flight agent
+             * @return int32_t 0 if successful, otherwise negative
+            */
+            int32_t init_subagents(Agent *agent, string remote_address);
 
             // Externs defined in obc_subagents.cpp
 
@@ -21,8 +28,8 @@ namespace ProjectName
             extern NODE_ID_TYPE ground_node_id;
 
             // File subagent
-            extern thread file_thread;
-            extern Cosmos::Module::FileModule* file_module;
+            // extern thread file_thread;
+            // extern Cosmos::Module::FileModule* file_module;
             // Websocket subagent
             extern thread websocket_thread;
             extern Cosmos::Module::WebsocketModule* websocket_module;

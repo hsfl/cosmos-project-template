@@ -7,24 +7,15 @@ using namespace ProjectName::Utils;
 
 int main(int argc, char *argv[])
 {
-    uint8_t debug_level = 0;
-
-    // Optional command line argument to set the debug print level. Use value of 2 for debug printing.
-    // Example usage: agent_obc 2
-    if (argc == 2)
-    {
-        debug_level = atoi(argv[1]);
-    }
+    handle_cmd_line_args(argc, argv);
 
     ////////////////////////////////////
     // Initialization
     ////////////////////////////////////
     // Initialize agent
-    init_agent(argv, "ground", debug_level);
-    // Debugging level can be set by the command line argument or by an agent request
-    agent->set_debug_level(debug_level);
+    init_agent("ground");
     // Initialize subagents
-    init_subagents(agent);
+    init_subagents(agent, remote_address);
 
     ////////////////////////////////////
     // Main Loop
@@ -40,7 +31,7 @@ int main(int argc, char *argv[])
         printf("Error in agent->wait() %d\n", iretn);
         exit(iretn);
     }
-    file_thread.join();
+    // file_thread.join();
     websocket_thread.join();
     agent->shutdown();
 
@@ -60,7 +51,7 @@ void ProjectName::Ground::Agent::Loop()
     while(agent->running())
     {
         check_events();
-        ping_inactive_nodes();
+        // ping_inactive_nodes();
 
         // Comm - Internal
         // Handle packets in the main-thread queue (0)
@@ -174,24 +165,73 @@ int32_t ProjectName::Ground::Agent::example_agent_request(string& request, strin
 ////////////////////////////////////
 // Initialization functions
 ////////////////////////////////////
-void ProjectName::Ground::Agent::init_agent(char *argv[], string node_name, uint16_t debug)
+void ProjectName::Ground::Agent::handle_cmd_line_args(int argc, char *argv[])
+{
+    bool display_help = false;
+    file_name_arg0 = argv[0];
+    for (size_t i=1; i < argc; ++i)
+    {
+        string arg = argv[i];
+        if (arg == "-h" || arg == "--help")
+        {
+            display_help = true;
+            break;
+        }
+        else if (arg == "-d" || arg == "--debug")
+        {
+            debug_level = 2;
+        }
+        else if ((arg == "-r" || arg == "--remote") && i+1 < argc)
+        {
+            remote_address = argv[++i];
+        }
+        else if ((arg == "-w" || arg == "--cosmos_web_addr") && i+1 < argc)
+        {
+            cosmos_web_addr = argv[++i];
+        }
+        else
+        {
+            cout << "Error parsing argument: " << arg << endl;
+            display_help = true;
+            break;
+        }
+    }
+    if (display_help)
+    {
+        cout << "Usage: " << argv[0] << " [options]" << endl;
+        cout << "Options:" << endl;
+        cout << "  -h, --help                       Display this help message" << endl;
+        cout << "  -d, --debug                      Enable debug printing" << endl;
+        cout << "  -r, --remote ADDRESS             Address or hostname of the flight agent" << endl;
+        cout << "  -w, --cosmos_web_addr ADDRESS    Address or hostname of the Telegraf instance" << endl;
+        exit(0);
+    }
+}
+
+void ProjectName::Ground::Agent::init_agent(string node_name)
 {
     // A Realm can be thought of as a project.
     // A Node can be thought of as a distinct entity capable of independent action in the scope of the project.
     // An Agent is one of potentially many processes running on the node.
-    agent = new Support::Agent("projectname", node_name, "main", 0., 10000, false, 0, NetworkType::UDP, debug);
+    agent = new Support::Agent("demo", node_name, "main", 0., 10000, false, 0, NetworkType::UDP, debug_level);
 
     // Check if agent was successfully started
     int32_t iretn = 0;
     if ((iretn = agent->wait()) < 0) {
-        agent->debug_log.Printf("%16.10f %s Failed to start Agent %s on Node %s Dated %s : %s\n",currentmjd(), mjd2iso8601(currentmjd()).c_str(), agent->getAgent().c_str(), agent->getNode().c_str(), utc2iso8601(data_ctime(argv[0])).c_str(), cosmos_error_string(iretn).c_str());
+        agent->debug_log.Printf("%16.10f %s Failed to start Agent %s on Node %s Dated %s : %s\n",currentmjd(), mjd2iso8601(currentmjd()).c_str(), agent->getAgent().c_str(), agent->getNode().c_str(), utc2iso8601(data_ctime(file_name_arg0)).c_str(), cosmos_error_string(iretn).c_str());
         exit(iretn);
     } else {
-        agent->debug_log.Printf("%16.10f %s Started Agent %s on Node %s Dated %s\n",currentmjd(), mjd2iso8601(currentmjd()).c_str(), agent->getAgent().c_str(), agent->getNode().c_str(), utc2iso8601(data_ctime(argv[0])).c_str());
+        agent->debug_log.Printf("%16.10f %s Started Agent %s on Node %s Dated %s\n",currentmjd(), mjd2iso8601(currentmjd()).c_str(), agent->getAgent().c_str(), agent->getNode().c_str(), utc2iso8601(data_ctime(file_name_arg0)).c_str());
     }
 
+    // TODO: not ideal but must be done here to visualize correctly
+    agent->cinfo->node.type = NODE_TYPE_SATELLITE;
+
     // Open up a socket for sending beacon data to Telegraf
-    open_cosmos_web_socket(cosmos_web_telegraf_channel_dev, COSMOS_WEB_ADDR, TELEGRAF_PORT_DEV);
+    open_cosmos_web_socket(cosmos_web_telegraf_channel_dev, cosmos_web_addr, TELEGRAF_PORT_DEV);
+    telemHelper.initialize(cosmos_web_addr, agent->cinfo);
+    // TODO: probably not desireable in the long run to put this here
+    telemHelper.reset_db(agent->cinfo);
 
     // Set channels
     add_channels(agent);
@@ -233,6 +273,8 @@ int32_t ProjectName::Ground::Agent::DecodeBeacon(PacketComm& packet, string &res
 
     // Send json beacon data to Telegraf dev port, which will be fed into the database
     socket_sendto(cosmos_web_telegraf_channel_dev, response);
+
+    telemHelper.send_telem_to_cosmos_web(agent->cinfo, beacon);
 
     return iretn;
 }
