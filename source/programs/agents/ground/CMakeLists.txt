@@ -1,3 +1,3 @@
 add_executable(agent_ground agent_ground.cpp agent_ground.h)
-target_link_libraries(agent_ground GroundSubAgents ProjectNameUtility ProjectNameCommon)
+target_link_libraries(agent_ground GroundSubAgents ProjectNameUtility ProjectNameCommon TelemHelpers)
 install(TARGETS agent_ground DESTINATION bin)

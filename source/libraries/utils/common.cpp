@@ -2,7 +2,7 @@
 
 void ProjectName::Common::add_channels(Cosmos::Support::Agent* agent)
 {
-    agent->channel_add("COMM", Support::Channel::PACKETCOMM_DATA_SIZE, 18000.);
+    agent->channel_add("COMM", Support::Channel::PACKETCOMM_DATA_SIZE, Support::Channel::PACKETCOMM_PACKETIZED_SIZE, 18000., 1000);
 }
 
 void ProjectName::Common::fire_event(const std::vector<bool>& flags, bool& event_state, void (*event)(bool))

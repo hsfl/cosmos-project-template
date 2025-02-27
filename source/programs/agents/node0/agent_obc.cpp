@@ -6,24 +6,15 @@ using namespace ProjectName::Common;
 
 int main(int argc, char *argv[])
 {
-    uint8_t debug_level = 0;
-
-    // Optional command line argument to set the debug print level. Use value of 2 for debug printing.
-    // Example usage: agent_obc 2
-    if (argc == 2)
-    {
-        debug_level = atoi(argv[1]);
-    }
+    handle_cmd_line_args(argc, argv);
 
     ////////////////////////////////////
     // Initialization
     ////////////////////////////////////
     // Initialize agent
-    init_agent(argv, "node0", debug_level);
-    // Debugging level can be set by the command line argument or by an agent request
-    agent->set_debug_level(debug_level);
+    init_agent("node0");
     // Initialize subagents
-    init_subagents(agent);
+    init_subagents(agent, remote_address);
 
     ////////////////////////////////////
     // Main Loop
@@ -39,7 +30,7 @@ int main(int argc, char *argv[])
         printf("Error in agent->wait() %d\n", iretn);
         exit(iretn);
     }
-    file_thread.join();
+    // file_thread.join();
     exec_thread.join();
     websocket_thread.join();
     agent->shutdown();
@@ -160,9 +151,9 @@ void ProjectName::Node0::Agent::send_beacons()
     // Beacons to be sent to ground if a connection is established.
     if (comm_connected_state)
     {
+        PacketHandler::QueueBeacon(static_cast<uint8_t>(Beacon::TypeId::ADCSStateBeacon), 1, agent, ground_node_id, "COMM");
         PacketHandler::QueueBeacon(static_cast<uint8_t>(Beacon::TypeId::CPUBeacon), 1, agent, ground_node_id, "COMM");
         PacketHandler::QueueBeacon(static_cast<uint8_t>(Beacon::TypeId::TsenBeacon), 1, agent, ground_node_id, "COMM");
-        PacketHandler::QueueBeacon(static_cast<uint8_t>(Beacon::TypeId::CameraBeacon), 1, agent, ground_node_id, "COMM");
     }
     timer.reset();
 }
@@ -187,20 +178,57 @@ void ProjectName::Node0::Agent::on_comm_connected_event_switch(bool active)
 ////////////////////////////////////
 // Initialization functions
 ////////////////////////////////////
-void ProjectName::Node0::Agent::init_agent(char *argv[], string node_name, uint16_t debug)
+void ProjectName::Node0::Agent::handle_cmd_line_args(int argc, char *argv[])
+{
+    bool display_help = false;
+    file_name_arg0 = argv[0];
+    for (size_t i=1; i < argc; ++i)
+    {
+        string arg = argv[i];
+        if (arg == "-h" || arg == "--help")
+        {
+            display_help = true;
+            break;
+        }
+        else if (arg == "-d" || arg == "--debug")
+        {
+            debug_level = 2;
+        }
+        else if ((arg == "-r" || arg == "--remote") && i+1 < argc)
+        {
+            remote_address = argv[++i];
+        }
+        else
+        {
+            cout << "Error parsing argument: " << arg << endl;
+            display_help = true;
+            break;
+        }
+    }
+    if (display_help)
+    {
+        cout << "Usage: " << argv[0] << " [options]" << endl;
+        cout << "Options:" << endl;
+        cout << "  -h, --help              Display this help message" << endl;
+        cout << "  -d, --debug             Enable debug printing" << endl;
+        cout << "  -r, --remote ADDRESS    Address or hostname of the flight agent" << endl;
+        exit(0);
+    }
+}
+void ProjectName::Node0::Agent::init_agent(string node_name)
 {
     // A Realm can be thought of as a project.
     // A Node can be thought of as a distinct entity capable of independent action in the scope of the project.
     // An Agent is one of potentially many processes running on the node.
-    agent = new Support::Agent("projectname", node_name, "main", 0., 10000, false, 0, NetworkType::UDP, debug);
+    agent = new Support::Agent("demo", node_name, "main", 0., 10000, false, 0, NetworkType::UDP, debug_level);
 
     // Check if agent was successfully started
     int32_t iretn = 0;
     if ((iretn = agent->wait()) < 0) {
-        agent->debug_log.Printf("%16.10f %s Failed to start Agent %s on Node %s Dated %s : %s\n",currentmjd(), mjd2iso8601(currentmjd()).c_str(), agent->getAgent().c_str(), agent->getNode().c_str(), utc2iso8601(data_ctime(argv[0])).c_str(), cosmos_error_string(iretn).c_str());
+        agent->debug_log.Printf("%16.10f %s Failed to start Agent %s on Node %s Dated %s : %s\n",currentmjd(), mjd2iso8601(currentmjd()).c_str(), agent->getAgent().c_str(), agent->getNode().c_str(), utc2iso8601(data_ctime(file_name_arg0)).c_str(), cosmos_error_string(iretn).c_str());
         exit(iretn);
     } else {
-        agent->debug_log.Printf("%16.10f %s Started Agent %s on Node %s Dated %s\n",currentmjd(), mjd2iso8601(currentmjd()).c_str(), agent->getAgent().c_str(), agent->getNode().c_str(), utc2iso8601(data_ctime(argv[0])).c_str());
+        agent->debug_log.Printf("%16.10f %s Started Agent %s on Node %s Dated %s\n",currentmjd(), mjd2iso8601(currentmjd()).c_str(), agent->getAgent().c_str(), agent->getNode().c_str(), utc2iso8601(data_ctime(file_name_arg0)).c_str());
     }
 
     // Set channels

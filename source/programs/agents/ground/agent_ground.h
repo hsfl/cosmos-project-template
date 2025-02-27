@@ -11,6 +11,7 @@
 #include "utils/common.h"
 #include "utils/utils.h"
 #include "subagent/ground/ground_subagents.h"
+#include "telem_helpers/TelemToDatabase.h"
 
 namespace ProjectName
 {
@@ -19,6 +20,10 @@ namespace ProjectName
         namespace Agent
         {
             Cosmos::Support::Agent *agent;
+            //! Agent logging type. Use 2 for debugging, 0 to disable.
+            uint16_t debug_level = 0;
+            //! Purely for debug log purposes.
+            string file_name_arg0 = "";
 
             // Flags, flipped on triggering conditions. Set these.
             //! Flag to check if communication is active between ground.
@@ -32,21 +37,31 @@ namespace ProjectName
             //! Port in Telegraf that routes to InfluxDB
             const int TELEGRAF_PORT_DEV = 10095;
             //! Hostname of Telegraf container
-            const string COSMOS_WEB_ADDR = "cosmos_telegraf";
+            // string cosmos_web_addr = "cosmos_telegraf";
             //! Address of Telegraf instance. Use if running locally, or change to IP address of where Telegraf is running.
-            // const string COSMOS_WEB_ADDR = "127.0.0.1";
+            string cosmos_web_addr = "127.0.0.1";
+            //! Address or hostname of the flight agent
+            string remote_address = "127.0.0.1";
+            //! Helper class for sending telemetry to the other database
+            TelemToDatabase telemHelper;
 
             //! Class that helps handle incoming packets
             PacketHandler packethandler;
 
             /**
+             * @brief Handle command line arguments
+             *
+             * @param argv argc from main
+             * @param argv Command line arguments from main()
+             */
+            void handle_cmd_line_args(int argc, char *argv[]);
+
+            /**
              * @brief Initializes the agent
              *
-             * @param argv Command line arguments from main()
              * @param node_name Name to use for this node
-             * @param debug Debug level to default to when this agent is run
              */
-            void init_agent(char *argv[], string node_name, uint16_t debug=0);
+            void init_agent(string node_name);
 
             //! Loop of the main thread
             void Loop();

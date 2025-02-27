@@ -24,6 +24,10 @@ namespace ProjectName
 
             //! The main agent object to use for this program.
             Cosmos::Support::Agent *agent;
+            //! Agent logging type. Use 2 for debugging, 0 to disable.
+            uint16_t debug_level = 0;
+            //! Purely for debug log purposes.
+            string file_name_arg0 = "";
 
             // Flags, flipped on triggering conditions. Set these.
             //! Flag to check if communication is active between ground.
@@ -40,17 +44,26 @@ namespace ProjectName
             //! Main CPU didx
             uint16_t cpu_didx = 0;
 
+            //! Address or hostname of the ground agent
+            string remote_address = "127.0.0.1";
+
             //! Class that helps handle incoming packets
             PacketHandler packethandler;
 
             /**
+             * @brief Handle command line arguments
+             *
+             * @param argv argc from main
+             * @param argv Command line arguments from main()
+             */
+            void handle_cmd_line_args(int argc, char *argv[]);
+
+            /**
              * @brief Initializes the agent
              *
-             * @param argv Command line arguments from main()
              * @param node_name Name to use for this node
-             * @param debug Debug level to default to when this agent is run
              */
-            void init_agent(char *argv[], string node_name, uint16_t debug=0);
+            void init_agent(string node_name);
             //! Reads in initial date from file to calculate mission elapsed time
             void get_mission_elapsed_time(string node_name);
             //! Loads in some initial info into the cosmosstruc when program first starts
